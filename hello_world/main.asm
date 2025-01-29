@@ -1,5 +1,5 @@
 section .data
-    msg db "Hello, World!", 0 ; Null-terminated string
+    msg db "Hello, World!", 0xA, 0 ; Null-terminated string
 
 section .text
     global main
@@ -9,7 +9,7 @@ main:
     mov     rax, 1      ; 1 = write
     mov     rdi, 1      ; 1 = to stdout
     mov     rsi, msg    ; string to display in rsi
-    mov     rdx, 13     ; length of the string without null-terminator
+    mov     rdx, 14     ; length of the string without null-terminator
     syscall             ; display the string
     
     ; exit the program

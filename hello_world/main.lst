@@ -1,0 +1,20 @@
+     1                                  section .data
+     2 00000000 48656C6C6F2C20576F-         msg db "Hello, World!", 0xA, 0 ; Null-terminated string
+     2 00000009 726C64210A00       
+     3                                  
+     4                                  section .text
+     5                                      global main
+     6                                  
+     7                                  main:
+     8                                      ; Write 'Hello, World!' to stdout
+     9 00000000 B801000000                  mov     rax, 1      ; 1 = write
+    10 00000005 BF01000000                  mov     rdi, 1      ; 1 = to stdout
+    11 0000000A 48BE-                       mov     rsi, msg    ; string to display in rsi
+    11 0000000C [0000000000000000] 
+    12 00000014 BA0E000000                  mov     rdx, 14     ; length of the string without null-terminator
+    13 00000019 0F05                        syscall             ; display the string
+    14                                      
+    15                                      ; exit the program
+    16 0000001B B83C000000                  mov     rax, 60     ; 60 = exit
+    17 00000020 4831FF                      xor     rdi, rdi    ; 0 = success exit code
+    18 00000023 0F05                        syscall             ; quit
