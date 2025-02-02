@@ -1,0 +1,11 @@
+     1                                  section .data
+     2 00000000 05000000                    num DD 5
+     3                                  
+     4                                  section .text
+     5                                  global main
+     6                                  
+     7                                  main:
+     8 00000000 B801000000                  MOV eax, 1
+     9 00000005 8B1C25[00000000]            MOV ebx, [num]
+    10 0000000C CD80                        INT 80h
+    11                                  
