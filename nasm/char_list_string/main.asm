@@ -1,10 +1,10 @@
-section .data
-    char DB 'A'
+        section .data
+        char DB 'A'
 
-section .text
-global main
+        section .text
+        global main
 
 main:
-    MOV bl, [char]
-    MOV eax, 1
-    INT 80h
+        MOV bl, [char]
+        MOV eax, 1
+        INT 80h
