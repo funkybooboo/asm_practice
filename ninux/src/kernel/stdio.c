@@ -120,11 +120,12 @@ void _cdecl printf(const char* fmt, ...) {
 
 const char possibleChars[] = "0123456789abcdef";
 
-int* printf_number(int* argp, int length, bool sign, int radix) {
-    char buffer[32];
-    unsigned long long number;
-    int number_sign = 1;
-    int pos = 0;
+// Helper: Extract the number from argp based on the length and sign,
+// update argp accordingly, and return the unsigned number and its sign.
+void extract_number_and_update_argp(int** argp_ptr, int length, bool sign, 
+                                           unsigned long long *number, int *number_sign) {
+    int* argp = *argp_ptr;
+    *number_sign = 1; // default positive
 
     switch (length) {
         case PRINTF_LENGTH_SHORT_SHORT:
@@ -134,55 +135,81 @@ int* printf_number(int* argp, int length, bool sign, int radix) {
                 int n = *argp;
                 if (n < 0) {
                     n = -n;
-                    number_sign = -1;
+                    *number_sign = -1;
                 }
-                number = (unsigned long long) n;
+                *number = (unsigned long long)n;
             } else {
-                number = *(unsigned int*) argp;
+                *number = *(unsigned int*)argp;
             }
-            argp++;
+            *argp_ptr = argp + 1;
             break;
         case PRINTF_LENGTH_LONG:
             if (sign) {
                 long int n = *(long int*)argp;
                 if (n < 0) {
                     n = -n;
-                    number_sign = -1;
+                    *number_sign = -1;
                 }
-                number = (unsigned long long) n;
+                *number = (unsigned long long)n;
             } else {
-                number = *(unsigned long int*) argp;
+                *number = *(unsigned long int*)argp;
             }
-            argp += 2;
+            *argp_ptr = argp + 2;
             break;
         case PRINTF_LENGTH_LONG_LONG:
             if (sign) {
                 long long int n = *(long long int*)argp;
                 if (n < 0) {
                     n = -n;
-                    number_sign = -1;
+                    *number_sign = -1;
                 }
-                number = (unsigned long long) n;
+                *number = (unsigned long long)n;
             } else {
-                number = *(unsigned long long int*) argp;
+                *number = *(unsigned long long int*)argp;
             }
-            argp += 4;
+            *argp_ptr = argp + 4;
             break;
     }
+}
 
+// Helper: Convert the number to a buffer using the given radix.
+// Returns the number of characters written.
+int convert_number_to_buffer(unsigned long long number, int radix, char* buffer) {
+    int pos = 0;
     do {
         uint32_t rem;
         x86_div64_32(number, radix, &number, &rem);
         buffer[pos++] = possibleChars[rem];
     } while (number > 0);
+    return pos;
+}
 
+// Helper: Print the buffer in reverse order.
+void print_buffer_in_reverse(char* buffer, int length) {
+    while (--length >= 0) {
+        putc(buffer[length]);
+    }
+}
+
+int* printf_number(int* argp, int length, bool sign, int radix) {
+    char buffer[32];
+    unsigned long long number;
+    int number_sign = 1;
+    int pos;
+
+    // Extract the number from argp and update argp.
+    extract_number_and_update_argp(&argp, length, sign, &number, &number_sign);
+    
+    // Convert the number into the buffer (digits in reverse order).
+    pos = convert_number_to_buffer(number, radix, buffer);
+    
+    // If signed and the number was negative, add '-' to the buffer.
     if (sign && number_sign < 0) {
         buffer[pos++] = '-';
     }
-
-    while (--pos >= 0) {
-        putc(buffer[pos]);
-    }
-
+    
+    // Print the buffer in reverse order to output the number correctly.
+    print_buffer_in_reverse(buffer, pos);
+    
     return argp;
 }
