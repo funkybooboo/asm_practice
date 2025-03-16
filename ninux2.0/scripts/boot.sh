@@ -2,11 +2,16 @@
 
 set -e
 
-gcc -m32 -fno-stack-protector -fno-builtin -c kernel.c -o kernel.o
-gcc -m32 -fno-stack-protector -fno-builtin -c vga.c -o vga.o
-nasm -f elf32 boot.asm -o boot.o
-ld -m elf_i386 -T linker.ld -o kernel boot.o kernel.o vga.o
-rm -rf Ninux/boot/kernel
-mv kernel Ninux/boot/
-grub-mkrescue -o Ninux.iso Ninux/
-qemu-system-i386 Ninux.iso
+rm -rf build/
+mkdir -p build/Ninux/boot/grub/
+
+gcc -m32 -fno-stack-protector -fno-builtin -c src/kernel.c -o build/kernel.o
+gcc -m32 -fno-stack-protector -fno-builtin -c src/vga.c -o build/vga.o
+nasm -f elf32 src/bootloader/boot.asm -o build/boot.o
+ld -m elf_i386 -T src/linker.ld -o build/kernel build/boot.o build/kernel.o build/vga.o
+
+cp build/kernel build/Ninux/boot/
+cp configs/grub.cfg build/Ninux/boot/grub/
+
+grub-mkrescue -o build/Ninux.iso build/Ninux/
+qemu-system-i386 build/Ninux.iso
