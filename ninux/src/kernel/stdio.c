@@ -19,102 +19,100 @@ void puts_f(const char far* s){
     }
 }
 
-void _cdecl printf(const char* fmt, ...) {
-    int* argp = (int*) &fmt;
-    int state = PRINTF_STATE_START;
+// Helper: Process a format specifier that appears after a '%'.
+// This function reads optional length modifiers ('h' or 'l') and then the conversion specifier,
+// performing the corresponding output and updating the argument pointer.
+// It also updates the format string pointer so that it points past the specifier.
+int* process_format_specifier(int* argp, const char** fmt_ptr) {
     int length = PRINTF_LENGTH_START;
     int radix = 10;
     bool sign = false;
+    const char* fmt = *fmt_ptr;
 
-    argp++;
-    while (*fmt) {
-        switch (state) {
-            case PRINTF_STATE_START:
-                if (*fmt == '%') {
-                    state = PRINTF_STATE_LENGTH;
-                } else {
-                    putc(*fmt);
-                }
-                break;
-            case PRINTF_STATE_LENGTH:
-                if (*fmt == 'h') {
-                    length = PRINTF_LENGTH_SHORT;
-                    state = PRINTF_STATE_SHORT;
-                } else if (*fmt == 'l') {
-                    length = PRINTF_LENGTH_LONG;
-                    state = PRINTF_STATE_LONG;
-                } else {
-                    goto PRINTF_STATE_SPEC_;
-                }
-                break;
-            case PRINTF_STATE_SHORT:
-                if (*fmt == 'h') {
-                    length = PRINTF_LENGTH_SHORT_SHORT;
-                    state = PRINTF_STATE_SPEC;
-                } else {
-                    goto PRINTF_STATE_SPEC_;
-                }
-                break;
-            case PRINTF_STATE_LONG:
-                if (*fmt == 'l') {
-                    length = PRINTF_LENGTH_LONG_LONG;
-                    state = PRINTF_STATE_SPEC;
-                } else {
-                    goto PRINTF_STATE_SPEC_;
-                }
-                break;
-            case PRINTF_STATE_SPEC:
-                PRINTF_STATE_SPEC_:
-                    switch (*fmt) {
-                        case 'c':
-                            putc((char)*argp);
-                            argp++;
-                            break;
-                        case 's':
-                            if (length == PRINTF_LENGTH_LONG || length == PRINTF_LENGTH_LONG_LONG) {
-                                puts_f(*(const char far**)argp);
-                                argp += 2;
-                            } else {
-                                puts(*(const char**)argp);
-                                argp++;
-                            }
-                            break;
-                        case '%':
-                            putc('%');
-                            break;
-                        case 'd':
-                        case 'i':
-                            radix = 10;
-                            sign = true;
-                            argp = printf_number(argp, length, sign, radix);
-                            break;
-                        case 'u':
-                            radix = 10;
-                            sign = false;
-                            argp = printf_number(argp, length, sign, radix);
-                            break;
-                        case 'X':
-                        case 'x':
-                        case 'p':
-                            radix = 16;
-                            sign = false;
-                            argp = printf_number(argp, length, sign, radix);
-                            break;
-                        case 'o':
-                            radix = 8;
-                            sign = false;
-                            argp = printf_number(argp, length, sign, radix);
-                            break;
-                        default:
-                            break;
-                    }
-                state = PRINTF_STATE_START;
-                length = PRINTF_LENGTH_START;
-                radix = 10;
-                sign = false;
-                break;
-        }
+    // Check for optional length modifiers.
+    if (*fmt == 'h') {
+        length = PRINTF_LENGTH_SHORT;
         fmt++;
+        if (*fmt == 'h') {  // Two h's => short short.
+            length = PRINTF_LENGTH_SHORT_SHORT;
+            fmt++;
+        }
+    } else if (*fmt == 'l') {
+        length = PRINTF_LENGTH_LONG;
+        fmt++;
+        if (*fmt == 'l') {  // Two l's => long long.
+            length = PRINTF_LENGTH_LONG_LONG;
+            fmt++;
+        }
+    }
+    
+    // Process the conversion specifier.
+    switch (*fmt) {
+        case 'c':
+            putc((char)*argp);
+            argp++;
+            break;
+        case 's':
+            if (length == PRINTF_LENGTH_LONG || length == PRINTF_LENGTH_LONG_LONG) {
+                puts_f(*(const char far**)argp);
+                argp += 2;
+            } else {
+                puts(*(const char**)argp);
+                argp++;
+            }
+            break;
+        case '%':
+            putc('%');
+            break;
+        case 'd':
+        case 'i':
+            radix = 10;
+            sign = true;
+            argp = printf_number(argp, length, sign, radix);
+            break;
+        case 'u':
+            radix = 10;
+            sign = false;
+            argp = printf_number(argp, length, sign, radix);
+            break;
+        case 'X':
+        case 'x':
+        case 'p':
+            radix = 16;
+            sign = false;
+            argp = printf_number(argp, length, sign, radix);
+            break;
+        case 'o':
+            radix = 8;
+            sign = false;
+            argp = printf_number(argp, length, sign, radix);
+            break;
+        default:
+            // Unknown specifier: do nothing.
+            break;
+    }
+    
+    // Move past the conversion specifier.
+    fmt++;
+    *fmt_ptr = fmt;
+    return argp;
+}
+
+void _cdecl printf(const char* fmt, ...) {
+    int* argp = (int*) &fmt;
+    // Skip the pointer to fmt to point to the first variadic argument.
+    argp++;
+
+    // Process each character in the format string.
+    while (*fmt) {
+        if (*fmt != '%') {
+            putc(*fmt);
+            fmt++;
+        } else {
+            // Found a '%'; skip it and process the format specifier.
+            fmt++; 
+            argp = process_format_specifier(argp, &fmt);
+        }
     }
 }
 
