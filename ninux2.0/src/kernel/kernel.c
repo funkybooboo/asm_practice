@@ -1,7 +1,4 @@
-#include "vga.h"
-#include "gdt.h"
-
-void kmain(void);
+#include "kernel.h"
 
 void kmain(void) {
     // reset();
