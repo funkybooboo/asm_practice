@@ -1,5 +1,4 @@
-#include "stdint.h"
-#include "stdio.h"
+#include "stdio/stdio.h"
 
 void _cdecl cstart_(){
     puts("Ninux from C!\r\n");
