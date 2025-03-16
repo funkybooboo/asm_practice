@@ -5,7 +5,7 @@ void putc(char c);
 void puts(const char* str);
 void _cdecl printf(const char* fmt, ...);
 void puts_f(const char far* s);
-int* printf_number(int*, int, bool, int);
+int* printf_number(int* argp, int length, bool sign, int radix);
 
 #define PRINTF_STATE_START 0
 #define PRINTF_STATE_LENGTH 1

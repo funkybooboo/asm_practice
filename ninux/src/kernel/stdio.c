@@ -119,6 +119,7 @@ void _cdecl printf(const char* fmt, ...) {
 }
 
 const char possibleChars[] = "0123456789abcdef";
+
 int* printf_number(int* argp, int length, bool sign, int radix) {
     char buffer[32];
     unsigned long long number;
