@@ -33,3 +33,10 @@ gdt_flush:
 .flush:
     ; Return from the function.
     ret
+
+global tss_flush
+tss_flush:
+    mov ax, 0x2b
+    ltr ax
+    
+    ret
