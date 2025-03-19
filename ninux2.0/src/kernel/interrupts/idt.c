@@ -94,7 +94,7 @@ void setIdtGate(uint8_t num, uint32_t base, uint16_t sel, uint8_t flags) {
     idt_entries[num].flags = flags | 0x60;
 }
 
-unsigned char* exception_messages[] = {
+char* exception_messages[] = {
     "Division By Zero",
     "Debug",
     "Non Maskable Interrput",
@@ -114,18 +114,18 @@ unsigned char* exception_messages[] = {
     "Coprocessor fault",
     "Alignment fault",
     "Machine Check",
-    "Reserved"
-    "Reserved"
-    "Reserved"
-    "Reserved"
-    "Reserved"
-    "Reserved"
-    "Reserved"
-    "Reserved"
-    "Reserved"
-    "Reserved"
-    "Reserved"
-    "Reserved"
+    "Reserved",
+    "Reserved",
+    "Reserved",
+    "Reserved",
+    "Reserved",
+    "Reserved",
+    "Reserved",
+    "Reserved",
+    "Reserved",
+    "Reserved",
+    "Reserved",
+    "Reserved",
     "Reserved"
 };
 

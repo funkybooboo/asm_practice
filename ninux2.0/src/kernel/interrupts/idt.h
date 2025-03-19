@@ -20,6 +20,9 @@ void setIdtGate(uint8_t num, uint32_t base, uint16_t sel, uint8_t flags);
 
 void isr_handler(struct InterruptRegisters* regs);
 
+void irq_install_handler(int irq, void (*handler)(struct InterruptRegisters *regs));
+void irq_uninstall_handler(int irq);
+
 extern void isr0();
 extern void isr1();
 extern void isr2();
