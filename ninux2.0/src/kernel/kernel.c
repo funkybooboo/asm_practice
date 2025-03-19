@@ -1,19 +1,19 @@
 #include "kernel.h"
-#include "gdt/gdt.h"
-#include "interrupts/idt.h"
-#include "vga/vga.h"
-#include "timer/timer.h"
 
 void kmain(void) {
-    // reset();
-    // print("Hello, World!\r\n");
+    reset();
 
     initGdt();
-    print("GDT is done!\r\n");
+    print("GDT is ready!\r\n");
 
     initIdt();
-    print("IDT is done!\r\n");
+    print("IDT is ready!\r\n");
 
     initTimer();
+    print("Timer is ready!\r\n");
 
+    initKeyboard();
+    print("Keyboard is ready!\r\n");
+
+    for(;;); // Halt
 }

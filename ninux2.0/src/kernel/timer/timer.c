@@ -5,7 +5,7 @@ const uint32_t freq = 100;
 
 void onIrq0(struct InterruptRegisters* regs) {
     ticks += 1;
-    print("Timer ticked!");
+    // print("Timer ticked!");
 }
 
 void initTimer() {

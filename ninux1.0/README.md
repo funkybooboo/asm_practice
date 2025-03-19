@@ -2,6 +2,14 @@
 
 Ninux is a simple operating system written in NASM. The bootloader loads the kernel (typically `KERNEL.BIN`) from a FAT12-formatted disk image. It uses BIOS interrupts for disk and screen I/O, demonstrating basic low-level programming techniques and system bootstrapping.
 
+## Setup
+
+Install wcc, wlink, and qemu
+
+## Usage
+
+Run `./scripts/run.sh` to build and boot the system using qemu
+
 ## Overview
 
 - **Bootloader:**  
