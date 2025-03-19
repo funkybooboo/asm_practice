@@ -6,4 +6,6 @@ void kmain(void) {
 
     initGdt();
     print("GDT is done!\r\n");
+    initIdt();
+    print("IDT is done!\r\n");
 }
