@@ -1,34 +1,34 @@
 global idt_flush
 idt_flush:
-    mov eax, [esp+4]
-    lidt [eax]
-    sti
-    ret
+    mov eax, [esp+4]    ; Load the pointer to the IDT descriptor (passed on the stack) into EAX
+    lidt [eax]          ; Load the Interrupt Descriptor Table using the descriptor pointed by EAX
+    sti                 ; Set the interrupt flag to enable interrupts
+    ret                 ; Return from the procedure
 
 %macro ISR_NOERRCODE 1
     global isr%1
     isr%1:
-        cli
-        push long 0
-        push long %1
-        jmp isr_common_stub
+        cli             ; Disable interrupts
+        push long 0     ; Push a dummy error code (0) to align the stack for ISRs without an error code
+        push long %1    ; Push the interrupt number onto the stack
+        jmp isr_common_stub   ; Jump to the common interrupt service routine handler
 %endmacro
 
 %macro ISR_ERRCODE 1
     global isr%1
     isr%1:
-        cli
-        push long %1
-        jmp isr_common_stub
+        cli             ; Disable interrupts
+        push long %1    ; Push the interrupt number (error code already present) onto the stack
+        jmp isr_common_stub   ; Jump to the common interrupt service routine handler
 %endmacro
 
 %macro IRQ 2
     global irq%1
     irq%1:
-        cli
-        push long 0
-        push long %2
-        jmp irq_common_stub
+        cli             ; Disable interrupts
+        push long 0     ; Push a dummy error code (0) to maintain stack consistency for IRQs
+        push long %2    ; Push the IRQ number onto the stack
+        jmp irq_common_stub   ; Jump to the common IRQ handler routine
 %endmacro
 
 ISR_NOERRCODE 0
@@ -86,32 +86,32 @@ ISR_NOERRCODE 177
     extern %2
     global %1
     %1:
-        pusha
-        mov eax, ds
-        push eax
-        mov eax, cr2
-        push eax
+        pusha                   ; Save all general-purpose registers on the stack
+        mov eax, ds             ; Move the current data segment selector into EAX
+        push eax                ; Save the original data segment register value on the stack
+        mov eax, cr2            ; Read the CR2 register (faulting address on page fault) into EAX
+        push eax                ; Push the faulting address onto the stack
 
-        mov ax, 0x10
-        mov ds, ax
-        mov es, ax
-        mov fs, ax
-        mov gs, ax
+        mov ax, 0x10            ; Load the kernel data segment selector (0x10) into AX
+        mov ds, ax              ; Set DS to the kernel data segment
+        mov es, ax              ; Set ES to the kernel data segment
+        mov fs, ax              ; Set FS to the kernel data segment
+        mov gs, ax              ; Set GS to the kernel data segment
 
-        push esp
-        call %2
+        push esp                ; Push the current stack pointer to pass the pointer to the handler
+        call %2                 ; Call the external handler function (ISR or IRQ handler)
+        add esp, 8              ; Clean up the two values pushed earlier (faulting address and original DS)
 
-        add esp, 8
-        pop ebx
-        mov ds, bx
-        mov es, bx
-        mov fs, bx
-        mov gs, bx
+        pop ebx                 ; Retrieve the saved original DS from the stack into EBX
+        mov ds, bx              ; Restore DS from EBX
+        mov es, bx              ; Restore ES from EBX
+        mov fs, bx              ; Restore FS from EBX
+        mov gs, bx              ; Restore GS from EBX
 
-        popa
-        add esp, 8
-        sti
-        iret
+        popa                    ; Restore all general-purpose registers
+        add esp, 8              ; Remove the pushed error code and interrupt/IRQ number from the stack
+        sti                     ; Enable interrupts by setting the interrupt flag
+        iret                    ; Return from the interrupt, restoring execution context
 %endmacro
 
 COMMON_STUB isr_common_stub, isr_handler

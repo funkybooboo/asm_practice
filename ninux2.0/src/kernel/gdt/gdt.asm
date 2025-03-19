@@ -36,7 +36,6 @@ gdt_flush:
 
 global tss_flush
 tss_flush:
-    mov ax, 0x2b
-    ltr ax
-    
-    ret
+    mov ax, 0x2b   ; Load the segment selector for the TSS into AX
+    ltr ax         ; Load the Task Register with the value in AX
+    ret            ; Return from the procedure
