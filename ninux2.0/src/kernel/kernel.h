@@ -5,5 +5,7 @@
 #include "vga/vga.h"
 #include "timer/timer.h"
 #include "keyboard/keyboard.h"
+#include "multiboot.h"
+#include "memory/memory.h"
 
-void kmain(void);
+void kmain(uint32_t magic, struct multiboot_info* bootInfo);

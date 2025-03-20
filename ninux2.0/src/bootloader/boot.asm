@@ -8,9 +8,9 @@ section .text
     ; Define a 32-bit word with a specific magic number (often used for boot loader verification)
     dd 0x1badb002
     ; Define a 32-bit word with a zero value (could represent flags or reserved field)
-    dd 0x00000000
+    dd 0x00000003
     ; Define a 32-bit word with the negative sum of the previous values (commonly used as a checksum)
-    dd -(0x1badb002 + 0x00000000)
+    dd -(0x1badb002 + 0x00000003)
 
 ; Declare the global entry point for the linker
 global start
@@ -23,6 +23,10 @@ start:
     cli
     ; Initialize the stack pointer with the address of stack_space
     mov esp, stack_space
+
+    push ebx
+    push eax
+
     ; Call the kmain function (the main function of the kernel)
     call kmain
     ; Halt the CPU after kmain returns, stopping further execution
