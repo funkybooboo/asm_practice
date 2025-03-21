@@ -28,8 +28,8 @@ section .boot
 
 global _start
 _start:
-    mov eax, (initial_page_dir - 0xc0000000)
-    mov cr3, eax
+    mov ecx, (initial_page_dir - 0xc0000000)
+    mov cr3, ecx
 
     mov ecx, cr4
     or ecx, 0x10
@@ -45,6 +45,7 @@ section .text
 higher_half:
     mov esp, stack_top
     push ebx
+    push eax
     xor ebp, ebp
     extern kmain
     call kmain
