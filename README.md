@@ -1,3 +1,3 @@
-# nasm_practice
+# asm_practice
 
 Learning some asm
