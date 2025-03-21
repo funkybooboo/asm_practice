@@ -1,49 +1,65 @@
-; Set the code to 32-bit mode
-bits 32
+MBOOT_PAGE_ALIGN equ 1 << 0
+MBOOT_MEM_INFO equ 1 << 1
+MBOOT_USE_GFX equ 0
 
-; Begin the text (code) section
+MBOOT_MAGIC equ 0x1badb002
+MBOOT_FLAGS equ MBOOT_PAGE_ALIGN | MBOOT_MEM_INFO | MBOOT_USE_GFX
+MBOOT_CHECKSUM equ -(MBOOT_MAGIC + MBOOT_FLAGS)
+
+section .multiboot
+align 4
+    dd MBOOT_MAGIC
+    dd MBOOT_FLAGS
+    dd MBOOT_CHECKSUM
+    dd 0, 0, 0, 0, 0
+
+    dd 0
+    dd 800
+    dd 600
+    dd 32
+
+section .bss
+align 16
+stack_bottom:
+    resb 16384 * 8
+stack_top:
+
+section .boot
+
+global _start
+_start:
+    mov eax, (initial_page_dir - 0xc0000000)
+    mov cr3, eax
+
+    mov ecx, cr4
+    or ecx, 0x10
+    mov cr4, ecx
+
+    mov ecx, cr0
+    or ecx, 0x80000000
+    mov cr0, ecx
+
+    jmp higher_half
+
 section .text
-    ; Align the following data on a 4-byte boundary
-    align 4
-    ; Define a 32-bit word with a specific magic number (often used for boot loader verification)
-    dd 0x1badb002
-    ; Define a 32-bit word with a zero value (could represent flags or reserved field)
-    dd 0x00000003
-    ; Define a 32-bit word with the negative sum of the previous values (commonly used as a checksum)
-    dd -(0x1badb002 + 0x00000003)
-
-; Declare the global entry point for the linker
-global start
-; Declare an external function named kmain (kernel main) that will be provided elsewhere
-extern kmain
-
-; Define the entry point of the program
-start:
-    ; Disable interrupts to ensure that the CPU does not get interrupted during setup
-    cli
-    ; Initialize the stack pointer with the address of stack_space
-    mov esp, stack_space
-
+higher_half:
+    mov esp, stack_top
     push ebx
-    push eax
-
-    ; Call the kmain function (the main function of the kernel)
+    xor ebp, ebp
+    extern kmain
     call kmain
-    ; Halt the CPU after kmain returns, stopping further execution
-    hlt
-
-; Define a label for an infinite halt loop (as a fallback or for error states)
 halt:
-    ; Disable interrupts again to ensure the CPU remains halted
-    cli
-    ; Halt the CPU
     hlt
-    ; Jump back to the halt label, creating an infinite loop to prevent further execution
     jmp halt
 
-; Begin the bss section for uninitialized data
-section .bss
-; Reserve 8192 bytes (8KB) of space for uninitialized data (e.g., used as a stack or other purposes)
-resb 8192
-; Define a label for the stack space, which is used to set the stack pointer
-stack_space:
+section .data
+align 4096
+global initial_page_dir
+initial_page_dir:
+    dd 10000011b
+    times 768-1 dd 0
+    dd (0 << 22) | 10000011b
+    dd (1 << 22) | 10000011b
+    dd (2 << 22) | 10000011b
+    dd (3 << 22) | 10000011b
+    times 256-4 dd 0

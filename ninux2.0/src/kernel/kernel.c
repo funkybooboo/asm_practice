@@ -15,8 +15,8 @@ void kmain(uint32_t magic, struct multiboot_info* bootInfo) {
     initKeyboard();
     print("Keyboard is ready!\r\n");
 
-    initMemory(bootInfo);
-    print("Memory is ready!\r\n");
+//    initMemory(bootInfo);
+//    print("Memory is ready!\r\n");
 
     for(;;); // Halt
 }
