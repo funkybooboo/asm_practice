@@ -17,4 +17,4 @@ nasm -f elf32 src/kernel/gdt/gdt.asm -o build/gdts.o
 nasm -f elf32 src/kernel/interrupts/idt.asm -o build/idts.o
 nasm -f elf32 src/kernel/stdlib/stdio.asm -o build/stdios.o
 
-ld -m elf_i386 -T src/linker.ld -o build/kernel build/boot.o build/kernel.o build/vga.o build/gdt.o build/gdts.o build/util.o build/idt.o build/idts.o build/timer.o build/stdio.o build/keyboard.o build/stdios.o build/memory.o
+ld -m elf_i386 -T linker.ld -o build/kernel build/boot.o build/kernel.o build/vga.o build/gdt.o build/gdts.o build/util.o build/idt.o build/idts.o build/timer.o build/stdio.o build/keyboard.o build/stdios.o build/memory.o
